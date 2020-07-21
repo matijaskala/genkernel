@@ -787,7 +787,7 @@ setup_overlayfs() {
 	local static=/mnt/livecd
 
 	rundebugshell overlayfs
-	for i in "${overlay}" "${static}"
+	for i in "${overlay}" "${static}" "/mnt/multilivecd"
 	do
 		[ ! -d "${i}" ] && run mkdir -p "${i}"
 	done
@@ -796,6 +796,9 @@ setup_overlayfs() {
 	run modprobe overlay >/dev/null 2>&1
 	checkfs overlay
 
+	[ -n "${MULTILIVE_SUBDIR}" ] && \
+		mount -t squashfs -o loop,ro "${CDROOT_PATH}/${LOOPEXT}${LOOP}" "/mnt/multilivecd" && \
+		mount -o rbind "/mnt/multilivecd/${MULTILIVE_SUBDIR}" "${static}" || \
 	mount -t squashfs -o loop,ro "${CDROOT_PATH}/${LOOPEXT}${LOOP}" "${static}"
 	mount -t tmpfs none "${overlay}"
 	mkdir "${upperdir}" "${workdir}"
@@ -2677,7 +2680,7 @@ setup_squashfs_aufs() {
 	# Setup aufs directories and vars
 	aufs_rw_branch=/mnt/aufs-rw-branch aufs_ro_branch=/mnt/livecd
 
-	for dir in ${aufs_rw_branch} ${aufs_ro_branch}
+	for dir in ${aufs_rw_branch} ${aufs_ro_branch} /mnt/multilivecd
 	do
 		[ ! -d "${dir}" ] && run mkdir -p "${dir}"
 	done
@@ -2686,6 +2689,9 @@ setup_squashfs_aufs() {
 	run modprobe aufs >/dev/null 2>&1
 	checkfs aufs
 
+	[ -n "${MULTILIVE_SUBDIR}" ] && \
+		mount -t squashfs -o loop,ro "${CDROOT_PATH}/${LOOPEXT}${LOOP}" "/mnt/multilivecd" && \
+		mount -o rbind "/mnt/multilivecd/${MULTILIVE_SUBDIR}" "${aufs_ro_branch}" || \
 	run mount -t squashfs -o loop,ro "${CDROOT_PATH}/${LOOPEXT}${LOOP}" "${aufs_ro_branch}"
 	run mount -t tmpfs none "${aufs_rw_branch}"
 	run mount -t aufs -o "br:${aufs_rw_branch}:${aufs_ro_branch}" aufs "${NEW_ROOT}"
