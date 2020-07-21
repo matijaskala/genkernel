@@ -440,6 +440,9 @@ do
 		verify)
 			VERIFY=1
 		;;
+		multilive_subdir\=*)
+			MULTILIVE_SUBDIR=${x#*=}
+		;;
 	esac
 done
 
